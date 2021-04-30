@@ -13,7 +13,7 @@ function UnstyledDock(props : DockProps) {
         <div className={props.className}>
             <DockTitle />
             <DockSearch />
-            <DockMenu />
+            <DockMenu nodeList={["Generic", "Generic"]}/>
         </div>
     )
 }
