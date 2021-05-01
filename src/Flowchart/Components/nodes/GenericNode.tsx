@@ -1,19 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDrag } from "react-dnd";
 import styled from "styled-components";
 import { DragTypes } from "./FCNodes";
 
 interface GenericNodeProps {
   className?: string;
+  id: string;
 }
 
 function UnstyledGenericNode(props: GenericNodeProps) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: DragTypes.NODE,
+    item: { name: "Generic", id: props.id },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   }));
+
   return (
     <div className={props.className} ref={drag}>
       <h4>Generic</h4>
@@ -24,6 +27,7 @@ function UnstyledGenericNode(props: GenericNodeProps) {
 const GenericNode = styled(UnstyledGenericNode)<{
   xPos: number;
   yPos: number;
+  static: boolean;
 }>`
   height: 50px;
   width: 100px;
@@ -34,6 +38,8 @@ const GenericNode = styled(UnstyledGenericNode)<{
   align-items: center;
   justify-content: center;
   cursor: move;
+
+  position: ${(props) => (props.static ? "static" : "absolute")};
 
   transform: translate(
     ${(props) => `${props.xPos}px`},

@@ -1,43 +1,37 @@
-import { useState } from "react";
-import { useDrop } from "react-dnd";
+import { useRef, useState } from "react";
+import { useDrop, XYCoord } from "react-dnd";
 import styled from "styled-components";
 import { DragTypes, NodeTypes, renderNode } from "./nodes/FCNodes";
+import { NodeItem, NodeLayout } from "./nodes/NodeData";
+import { v4 as uuid } from "uuid";
 
 interface FCEditorProps {
   className?: string;
+  nodes: NodeLayout[];
 }
 
 interface FCEditorContainerProps {
   className?: string;
 }
 
-interface NodeLayout {
-  type: NodeTypes;
-  xPos: number;
-  yPos: number;
-}
-
 const UnstyledFCEditor = (props: FCEditorProps) => {
-  const [nodes, setNodes] = useState<NodeLayout[]>([
-    {
-      type: "Generic",
-      xPos: 0,
-      yPos: 0,
-    },
-  ]);
-
   return (
     <div className={props.className}>
-      {nodes.map((node) => {
-        return renderNode(node.type, { xPos: node.xPos, yPos: node.yPos });
+      {props.nodes.map((node) => {
+        return renderNode(node.type, node.id, {
+          xPos: node.xPos,
+          yPos: node.yPos,
+          static: false,
+        });
       })}
     </div>
   );
 };
 
 const FCEditor = styled(UnstyledFCEditor)<{ isOver: boolean }>`
-  height: 100%;
   width: 100%;
+  height: 100%;
+
   background-color: ${(props) => (props.isOver ? "#e5e9f0" : "#2e3440")};
 `;
 
@@ -47,11 +41,46 @@ const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
+    drop: (item: NodeItem, monitor) => {
+      let itemName = item.name;
+
+      console.log(item);
+
+      let editorDimensions = editorRef.current?.getBoundingClientRect() as DOMRect;
+      let dropCoordinates = monitor.getSourceClientOffset() as XYCoord;
+
+      let xCoordinate = dropCoordinates.x - editorDimensions.x;
+      let yCoordinate = dropCoordinates.y - editorDimensions.y;
+      let tempNodes = nodes;
+
+      if (item.id === "base") {
+        tempNodes.push({
+          id: uuid(),
+          type: itemName,
+          xPos: xCoordinate,
+          yPos: yCoordinate,
+        });
+      } else {
+        let movedNodeIndex = tempNodes.findIndex((element) => {
+          return element.id === item.id;
+        });
+        tempNodes[movedNodeIndex].xPos = xCoordinate;
+        tempNodes[movedNodeIndex].yPos = yCoordinate;
+      }
+
+      setNodes(tempNodes);
+    },
   }));
+
+  const [nodes, setNodes] = useState<NodeLayout[]>([]);
+
+  const editorRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className={props.className} ref={drop}>
-      <FCEditor isOver={isOver} />
+      <div ref={editorRef} id={"pos-container"}>
+        <FCEditor isOver={isOver} nodes={nodes} />
+      </div>
     </div>
   );
 };
@@ -59,4 +88,9 @@ const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
 export const FCEditorContainer = styled(UnstyledFCEditorContainer)`
   width: 80%;
   height: 100%;
+
+  & #pos-container {
+    width: 100%;
+    height: 100%;
+  }
 `;

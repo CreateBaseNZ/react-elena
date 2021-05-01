@@ -10,8 +10,8 @@ let UnstyledDockMenu = (props: DockMenuProps) => {
   return (
     <div className={props.className}>
       <ul>
-        {props.nodeList.map((nodeName) => {
-          return <li>{renderNode(nodeName, { xPos: 0, yPos: 0 })}</li>;
+        {props.nodeList.map((nodeName, index) => {
+          return <li key={index}>{renderNode(nodeName, "base")}</li>;
         })}
       </ul>
     </div>
