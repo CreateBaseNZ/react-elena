@@ -1,29 +1,37 @@
-import GenericNode from "./GenericNode";
+import ProcessNode from "./ProccessNode";
 import { v4 as uuid } from "uuid";
-import { NodeTypes } from "./NodeData";
+import { NodeLayout, NodeTypes } from "./NodeData";
+import StartNode from "./StartNode";
+import { Relation } from "react-archer";
+import React from "react";
 
 const Nodes = {
-  GenericNode,
+  ProcessNode,
 };
 
-const renderNode = (
-  nodeName: NodeTypes,
-  id: string,
-  positon?: {
-    xPos: number;
-    yPos: number;
-    static: boolean;
-  }
-) => {
-  switch (nodeName) {
-    case "Generic":
+const renderNode = (node: NodeLayout, relations?: Relation[]) => {
+  switch (node?.type) {
+    case "Process":
       return (
-        <GenericNode
-          id={id}
+        <ProcessNode
+          id={node.id}
           key={uuid()}
-          static={positon !== undefined ? positon.static : true}
-          yPos={positon !== undefined ? positon.yPos : 0}
-          xPos={positon !== undefined ? positon.xPos : 0}
+          static={node !== undefined ? node.static : true}
+          yPos={node !== undefined ? node.yPos : 0}
+          xPos={node !== undefined ? node.xPos : 0}
+          relations={relations !== undefined ? relations : []}
+        />
+      );
+    case "Start":
+      return (
+        <StartNode
+          id={node.id}
+          key={uuid()}
+          zIndex={node !== undefined ? node.zIndex : 0}
+          static={node !== undefined ? node.static : true}
+          yPos={node !== undefined ? node.yPos : 0}
+          xPos={node !== undefined ? node.xPos : 0}
+          relations={relations !== undefined ? relations : []}
         />
       );
     default:

@@ -1,17 +1,19 @@
 import React, { useState } from "react";
+import { ArcherElement, Relation } from "react-archer";
 import { useDrag } from "react-dnd";
 import styled from "styled-components";
 import { DragTypes } from "./FCNodes";
 
-interface GenericNodeProps {
+interface ProcessNodeProps {
   className?: string;
   id: string;
+  relations: Relation[];
 }
 
-function UnstyledGenericNode(props: GenericNodeProps) {
+function UnstyledProcessNode(props: ProcessNodeProps) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: DragTypes.NODE,
-    item: { name: "Generic", id: props.id },
+    item: { name: "Process", id: props.id },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -19,12 +21,14 @@ function UnstyledGenericNode(props: GenericNodeProps) {
 
   return (
     <div className={props.className} ref={drag}>
-      <h4>Generic</h4>
+      <ArcherElement id={props.id} relations={props.relations}>
+        <h4>Process</h4>
+      </ArcherElement>
     </div>
   );
 }
 
-const GenericNode = styled(UnstyledGenericNode)<{
+const ProcessNode = styled(UnstyledProcessNode)<{
   xPos: number;
   yPos: number;
   static: boolean;
@@ -53,4 +57,4 @@ const GenericNode = styled(UnstyledGenericNode)<{
   }
 `;
 
-export default GenericNode;
+export default ProcessNode;

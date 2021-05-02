@@ -3,9 +3,11 @@ export interface NodeLayout {
   id: string;
   xPos: number;
   yPos: number;
+  static: boolean;
+  zIndex: number;
 }
 
-export type NodeTypes = "Generic" | null;
+export type NodeTypes = "Process" | "Start" | null;
 
 export type NodeItem = {
   name: NodeTypes;
