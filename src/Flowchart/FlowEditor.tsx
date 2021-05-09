@@ -24,8 +24,10 @@ function UnstyledFlowEditor(props: FlowEditorProps) {
   );
 }
 
-export const FlowEditor = styled(UnstyledFlowEditor)`
+const FlowEditor = styled(UnstyledFlowEditor)`
   height: 100%;
   width: 100%;
   display: flex;
 `;
+
+export default FlowEditor;
