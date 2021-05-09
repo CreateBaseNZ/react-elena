@@ -1,29 +1,34 @@
 import { ArcherContainer } from "react-archer";
 import styled from "styled-components";
-import { renderNode, NodeTypes } from "./nodes/FCNodes";
+import { ElenaNode } from "../Data/NodeData";
+import { renderNode } from "./Nodes/FCNodes";
 
-interface DockMenuProps {
+interface DockNodeMenuProps {
   className?: string;
-  nodeList: NodeTypes[];
+  nodeList: ElenaNode[];
 }
 
 // Note: ArcherContainer is needed here because the nodes are archer elements
-let UnstyledDockMenu = (props: DockMenuProps) => {
+let UnstyledDockNodeMenu = (props: DockNodeMenuProps) => {
   return (
     <div className={props.className}>
       <ArcherContainer>
         <ul>
-          {props.nodeList.map((nodeType, index) => {
+          {props.nodeList.map((node, index) => {
             return (
               <li key={index}>
-                {renderNode({
-                  type: nodeType,
-                  id: "base",
-                  xPos: 0,
-                  yPos: 0,
-                  zIndex: 0,
-                  static: true,
-                })}
+                {renderNode(
+                  {
+                    type: node.type,
+                    name: node.name,
+                    id: node.id,
+                    xPos: node.xPos,
+                    yPos: node.yPos,
+                    priority: node.priority,
+                    isStatic: node.isStatic,
+                  },
+                  false
+                )}
               </li>
             );
           })}
@@ -33,7 +38,7 @@ let UnstyledDockMenu = (props: DockMenuProps) => {
   );
 };
 
-export const DockMenu = styled(UnstyledDockMenu)`
+export const DockNodeMenu = styled(UnstyledDockNodeMenu)`
   background-color: darkgray;
   flex-grow: 1;
   overflow-y: scroll;

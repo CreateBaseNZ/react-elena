@@ -3,24 +3,29 @@ import { Dock } from "./Components/Dock";
 import { FCEditorContainer } from "./Components/FCEditor";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { ElenaNode, ElenaRelation } from "./Data/NodeData";
 
 interface FlowEditorProps {
   className?: string;
+  nodeList: ElenaNode[];
+  variableList?: {};
+  nodes?: ElenaNode[];
+  relations?: ElenaRelation[];
 }
 
 function UnstyledFlowEditor(props: FlowEditorProps) {
   return (
     <div className={props.className}>
       <DndProvider backend={HTML5Backend}>
-        <Dock nodeList={["Start", "Process"]} />
-        <FCEditorContainer />
+        <Dock nodeList={props.nodeList} />
+        <FCEditorContainer nodes={props.nodes} relations={props.relations} />
       </DndProvider>
     </div>
   );
 }
 
 export const FlowEditor = styled(UnstyledFlowEditor)`
-  height: 50vh;
-  width: 50vw;
+  height: 100%;
+  width: 100%;
   display: flex;
 `;

@@ -1,22 +1,27 @@
 import React, { useState } from "react";
 import { ControlledMenu, MenuItem } from "@szhsin/react-menu";
 import styled, { keyframes } from "styled-components";
+import { Add, Delete } from "@material-ui/icons";
 
 interface NodeContextMenuProps {
   className?: string;
+  nodeId: string;
+  isActive: boolean;
 }
 
 const UnstyledNodeContextMenu = (props: NodeContextMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
+
   return (
     <div
       className={props.className}
       onContextMenu={(ev: React.MouseEvent) => {
-        ev.preventDefault();
-        setAnchorPoint({ x: ev.clientX, y: ev.clientY });
-        setIsOpen(true);
-        console.log(anchorPoint);
+        if (props.isActive) {
+          ev.preventDefault();
+          setAnchorPoint({ x: ev.clientX, y: ev.clientY });
+          setIsOpen(true);
+        }
       }}
     >
       <ControlledMenu
@@ -24,7 +29,14 @@ const UnstyledNodeContextMenu = (props: NodeContextMenuProps) => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
       >
-        <MenuItem>Hello</MenuItem>
+        <MenuItem>
+          <Add />
+          Add Relation
+        </MenuItem>
+        <MenuItem>
+          <Delete />
+          Delete Node
+        </MenuItem>
       </ControlledMenu>
     </div>
   );
@@ -252,7 +264,7 @@ const NodeContextMenu = styled(UnstyledNodeContextMenu)`
   }
   .rc-menu__item--active {
     color: #fff;
-    background-color: #007bff;
+    background-color: #ff0022;
   }
   .rc-menu__item--type-radio {
     padding-left: 2.2rem;

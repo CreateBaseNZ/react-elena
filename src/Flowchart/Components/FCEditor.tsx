@@ -1,37 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { useDrop, XYCoord } from "react-dnd";
 import styled from "styled-components";
-import { DragTypes, NodeTypes, renderNode } from "./nodes/FCNodes";
-import { NodeItem, NodeLayout } from "./nodes/NodeData";
+import { DragTypes, renderNode } from "./Nodes/FCNodes";
+import { ElenaNode, ElenaRelation } from "../Data/NodeData";
 import { v4 as uuid } from "uuid";
 import { ArcherContainer } from "react-archer";
-import { NodeContextMenu } from "./nodes/NodeContextMenu";
 
 interface FCEditorProps {
   className?: string;
-  nodes: NodeLayout[];
+  nodes: ElenaNode[];
+  relations?: ElenaRelation[];
 }
 
 interface FCEditorContainerProps {
   className?: string;
+  nodes?: ElenaNode[];
+  relations?: ElenaRelation[];
 }
 
 const UnstyledFCEditor = (props: FCEditorProps) => {
   return (
-    <div className={props.className}>
-      <ArcherContainer>
-        {props.nodes.map((node) => {
-          return renderNode({
-            type: node.type,
-            id: node.id,
-            xPos: node.xPos,
-            yPos: node.yPos,
-            zIndex: node.zIndex,
-            static: false,
-          });
-        })}
-      </ArcherContainer>
-    </div>
+    <ArcherContainer className={props.className}>
+      {props.nodes.map((node) => {
+        return renderNode(node, true);
+      })}
+    </ArcherContainer>
   );
 };
 
@@ -43,33 +36,30 @@ const FCEditor = styled(UnstyledFCEditor)<{ isOver: boolean }>`
 `;
 
 const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
-  const [nodes, setNodes] = useState<NodeLayout[]>([]);
-
-  const [nodeOrder, setNodeOrder] = useState<string[]>([]);
+  const [nodes, setNodes] = useState<ElenaNode[]>([]);
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: DragTypes.NODE,
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
-    drop: (item: NodeItem, monitor) => {
-      let itemName = item.name;
-
+    drop: (item: ElenaNode, monitor) => {
       let editorDimensions = editorRef.current?.getBoundingClientRect() as DOMRect;
       let dropCoordinates = monitor.getSourceClientOffset() as XYCoord;
 
       let xCoordinate = dropCoordinates.x - editorDimensions.x;
       let yCoordinate = dropCoordinates.y - editorDimensions.y;
-      if (item.id === "base") {
-        let newId = uuid();
-        let newNode = {
-          id: newId,
-          type: itemName,
+      if (item.id.split("_")[0] === "base") {
+        let newNode: ElenaNode = {
+          id: uuid(),
+          isStatic: false,
+          priority: 0,
+          name: item.name,
+          type: item.type,
           xPos: xCoordinate,
           yPos: yCoordinate,
-          static: false,
-          zIndex: 0,
         };
+
         addNode(newNode);
       } else {
         moveNode(item.id, { x: xCoordinate, y: yCoordinate });
@@ -77,9 +67,12 @@ const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
     },
   }));
 
-  const addNode = (newNode: NodeLayout) => {
+  useEffect(() => {
+    console.log(nodes);
+  }, [nodes]);
+
+  const addNode = (newNode: ElenaNode) => {
     setNodes((prevNodes) => [...prevNodes, newNode]);
-    setNodeOrder((prevOrder) => [...prevOrder, newNode.id]);
   };
 
   const moveNode = (id: string, newPos: { x: number; y: number }) => {
@@ -88,37 +81,21 @@ const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
       let movedNode = newNodes.find((node) => node.id === id);
 
       if (movedNode) {
+        let prevPriority = movedNode.priority;
+        movedNode.priority = newNodes.length;
         movedNode.xPos = newPos.x;
         movedNode.yPos = newPos.y;
+
+        newNodes.forEach((newNode) => {
+          if (newNode.priority > prevPriority) {
+            newNode.priority--;
+          }
+        });
       }
 
       return newNodes;
     });
-
-    setNodeOrder((prevOrder) => {
-      let newOrder = [...prevOrder];
-      let movedIndex = newOrder.findIndex((order) => order === id);
-      newOrder.splice(movedIndex, 1);
-      newOrder.push(id);
-
-      return newOrder;
-    });
   };
-
-  useEffect(() => {
-    nodeOrder.forEach((node, index) => {
-      setNodes((prevNodes) => {
-        let newNodes = [...prevNodes];
-        let changingNode = newNodes.find((newNode) => newNode.id === node);
-        if (changingNode) {
-          console.log(nodeOrder.length - index);
-          changingNode.zIndex = index;
-        }
-
-        return newNodes;
-      });
-    });
-  }, [nodeOrder]);
 
   const editorRef = useRef<HTMLDivElement>(null);
 

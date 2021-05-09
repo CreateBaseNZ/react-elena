@@ -1,24 +1,25 @@
 import React from "react";
 import styled from "styled-components";
-import { DockMenu } from "./DockMenu";
+import { DockNodeMenu } from "./DockNodeMenu";
 import { DockSearch } from "./DockSearch";
 import { DockTitle } from "./DockTitle";
-import { NodeTypes } from "./nodes/NodeData";
+import { ElenaNode } from "../Data/NodeData";
 
 interface DockProps {
   className?: string;
-  nodeList: NodeTypes[];
+  nodeList: ElenaNode[];
+  variableList?: {};
 }
 
-function UnstyledDock(props: DockProps) {
+const UnstyledDock = (props: DockProps) => {
   return (
     <div className={props.className}>
       <DockTitle />
       <DockSearch />
-      <DockMenu nodeList={props.nodeList} />
+      <DockNodeMenu nodeList={props.nodeList} />
     </div>
   );
-}
+};
 
 export const Dock = styled(UnstyledDock)`
   display: flex;
@@ -26,6 +27,7 @@ export const Dock = styled(UnstyledDock)`
 
   overflow: hidden;
   width: 20%;
+  min-width: 280px;
   height: 100%;
   background-color: grey;
 `;

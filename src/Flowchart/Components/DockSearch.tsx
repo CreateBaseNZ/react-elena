@@ -15,7 +15,9 @@ function UnstyledDockSearch(props: DockSearchProps) {
 
 export const DockSearch = styled(UnstyledDockSearch)`
   background-color: lightgray;
-  & h1 {
-    margin: 0;
+  width: 100%;
+
+  & input {
+    width: 100%;
   }
 `;
