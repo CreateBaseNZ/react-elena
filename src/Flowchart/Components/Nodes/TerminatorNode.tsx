@@ -1,7 +1,6 @@
-import { ArcherElement, Relation } from "react-archer";
 import { useDrag } from "react-dnd";
 import styled from "styled-components";
-import { ElenaNode } from "../../Data/NodeData";
+import { ElenaNode, FCEditorMode } from "../../Data/NodeData";
 import { DragTypes } from "./FCNodes";
 import { NodeContextMenu } from "../Menus/NodeContextMenu";
 import NodeHeading from "./Node Components/NodeHeading";
@@ -10,23 +9,31 @@ interface TerminatorNodeProps {
   className?: string;
   hasContextMenu: boolean;
   node: ElenaNode;
-  relations?: Relation[];
+  mode: FCEditorMode;
+  setMode?: React.Dispatch<React.SetStateAction<FCEditorMode>>;
+  removeNode?: (targetNode: ElenaNode) => void;
 }
 
 interface TerminatorNodeContainerProps {
   className?: string;
   node: ElenaNode;
   hasContextMenu: boolean;
-  relations?: Relation[];
+  mode: FCEditorMode;
+  setMode?: React.Dispatch<React.SetStateAction<FCEditorMode>>;
+  removeNode?: (targetNode: ElenaNode) => void;
 }
 
 function UnstyledTerminatorNode(props: TerminatorNodeProps) {
   return (
     <div className={props.className}>
-      <ArcherElement id={props.node.id} relations={props.relations}>
-        <NodeHeading name={props.node.name} />
-      </ArcherElement>
-      <NodeContextMenu isActive={props.hasContextMenu} nodeId={props.node.id} />
+      <NodeHeading name={props.node.name} />
+
+      <NodeContextMenu
+        isActive={props.hasContextMenu}
+        node={props.node}
+        setMode={props.setMode}
+        removeNode={props.removeNode}
+      />
     </div>
   );
 }
@@ -45,7 +52,8 @@ const TerminatorNode = styled(UnstyledTerminatorNode)<{
   align-items: center;
   justify-content: center;
 
-  background-color: ${(props) => (props.isDragging ? "#4c566a" : "#3b4252")};
+  background-color: ${(props) =>
+    props.mode === "Normal" ? "#3b4252" : "#a3be8c"};
   color: #eceff4;
 `;
 
@@ -60,12 +68,24 @@ const UnstyledTerminatorNodeContainer = (
     }),
   }));
 
+  const handleClick = () => {
+    props.setMode && props.mode === "Relation" && props.setMode("Normal");
+  };
+
   return (
-    <div className={props.className} ref={drag}>
+    <div
+      className={props.className}
+      ref={drag}
+      onClick={handleClick}
+      id={props.node.id}
+    >
       <TerminatorNode
         node={props.node}
         isDragging={isDragging}
         hasContextMenu={props.hasContextMenu}
+        mode={props.mode}
+        setMode={props.setMode}
+        removeNode={props.removeNode}
       />
     </div>
   );

@@ -1,7 +1,11 @@
 import ProcessNode from "./ProccessNode";
 import { v4 as uuid } from "uuid";
-import { ElenaNode, NodeType } from "../../Data/NodeData";
-import { Relation } from "react-archer";
+import {
+  ElenaNode,
+  ElenaRelation,
+  FCEditorMode,
+  NodeType,
+} from "../../Data/NodeData";
 import TerminatorNodeContainer from "./TerminatorNode";
 import ProcessNodeContainer from "./ProccessNode";
 
@@ -11,8 +15,10 @@ const Nodes = {
 
 const renderNode = (
   node: ElenaNode,
+  mode: FCEditorMode,
   hasContextMenu: boolean,
-  relations?: Relation[]
+  setMode?: React.Dispatch<React.SetStateAction<FCEditorMode>>,
+  removeNode?: (targetNode: ElenaNode) => void
 ) => {
   switch (node?.type) {
     case "Process":
@@ -21,7 +27,9 @@ const renderNode = (
           hasContextMenu={hasContextMenu}
           key={uuid()}
           node={node}
-          relations={relations !== undefined ? relations : []}
+          mode={mode}
+          setMode={setMode}
+          removeNode={removeNode}
         />
       );
     case "Terminator":
@@ -30,7 +38,9 @@ const renderNode = (
           hasContextMenu={hasContextMenu}
           key={uuid()}
           node={node}
-          relations={relations !== undefined ? relations : []}
+          mode={mode}
+          setMode={setMode}
+          removeNode={removeNode}
         />
       );
     default:

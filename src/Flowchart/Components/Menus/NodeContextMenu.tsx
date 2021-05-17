@@ -2,16 +2,27 @@ import React, { useState } from "react";
 import { ControlledMenu, MenuItem } from "@szhsin/react-menu";
 import styled, { keyframes } from "styled-components";
 import { Add, Delete } from "@material-ui/icons";
+import { ElenaNode, FCEditorMode } from "../../Data/NodeData";
 
 interface NodeContextMenuProps {
   className?: string;
-  nodeId: string;
+  node: ElenaNode;
   isActive: boolean;
+  setMode?: React.Dispatch<React.SetStateAction<FCEditorMode>>;
+  removeNode?: (targetNode: ElenaNode) => void;
 }
 
 const UnstyledNodeContextMenu = (props: NodeContextMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
+
+  const handleAddRelation = () => {
+    props.setMode && props.setMode("Relation");
+  };
+
+  const handleDeleteNode = () => {
+    props.removeNode && props.removeNode(props.node);
+  };
 
   return (
     <div
@@ -29,11 +40,11 @@ const UnstyledNodeContextMenu = (props: NodeContextMenuProps) => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
       >
-        <MenuItem>
+        <MenuItem onClick={handleAddRelation}>
           <Add />
           Add Relation
         </MenuItem>
-        <MenuItem>
+        <MenuItem onClick={handleDeleteNode}>
           <Delete />
           Delete Node
         </MenuItem>

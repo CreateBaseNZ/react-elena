@@ -1,32 +1,42 @@
-import { ArcherElement, Relation } from "react-archer";
 import { useDrag } from "react-dnd";
 import styled from "styled-components";
-import { ElenaNode } from "../../Data/NodeData";
+import { ElenaNode, ElenaRelation, FCEditorMode } from "../../Data/NodeData";
 import { DragTypes } from "./FCNodes";
 import { NodeContextMenu } from "../Menus/NodeContextMenu";
 import NodeHeading from "./Node Components/NodeHeading";
+import NodeIO from "./Node Components/NodeIO";
 
 interface ProcessNodeProps {
   className?: string;
   hasContextMenu: boolean;
   node: ElenaNode;
-  relations?: Relation[];
+  mode: FCEditorMode;
+  setMode?: React.Dispatch<React.SetStateAction<FCEditorMode>>;
+  removeNode?: (targetNode: ElenaNode) => void;
 }
 
 interface ProcessNodeContainerProps {
   className?: string;
   hasContextMenu: boolean;
   node: ElenaNode;
-  relations: Relation[];
+  mode: FCEditorMode;
+  setMode?: React.Dispatch<React.SetStateAction<FCEditorMode>>;
+  removeNode?: (targetNode: ElenaNode) => void;
 }
 
 const UnstyledProcessNode = (props: ProcessNodeProps) => {
   return (
     <div className={props.className}>
-      <NodeContextMenu isActive={props.hasContextMenu} nodeId={props.node.id} />
-      <ArcherElement id={props.node.id} relations={props.relations}>
+      <NodeContextMenu
+        isActive={props.hasContextMenu}
+        node={props.node}
+        setMode={props.setMode}
+        removeNode={props.removeNode}
+      />
+      <div>
         <NodeHeading name={props.node.name} />
-      </ArcherElement>
+        <NodeIO inputs={props.node.inputs} outputs={props.node.outputs} />
+      </div>
     </div>
   );
 };
@@ -45,7 +55,8 @@ const ProcessNode = styled(UnstyledProcessNode)<{
   align-items: center;
   justify-content: center;
 
-  background-color: ${(props) => (props.isDragging ? "#4c566a" : "#3b4252")};
+  background-color: ${(props) =>
+    props.mode === "Normal" ? "#3b4252" : "#a3be8c"};
   color: #eceff4;
   & h4 {
     margin: 0;
@@ -61,25 +72,35 @@ const UnstyledProcessNodeContainer = (props: ProcessNodeContainerProps) => {
     }),
   }));
 
+  const handleClick = () => {
+    props.setMode && props.mode === "Relation" && props.setMode("Normal");
+  };
+
   return (
-    <div className={props.className} ref={drag}>
+    <div
+      className={props.className}
+      ref={drag}
+      onClick={handleClick}
+      id={props.node.id}
+    >
       <ProcessNode
         node={props.node}
         hasContextMenu={props.hasContextMenu}
         isDragging={isDragging}
+        mode={props.mode}
+        setMode={props.setMode}
+        removeNode={props.removeNode}
       />
     </div>
   );
 };
 
 const ProcessNodeContainer = styled(UnstyledProcessNodeContainer)`
-  height: 50px;
+  height: auto;
   width: 250px;
 
   position: ${(props) => (props.node.isStatic ? "static" : "absolute")};
   z-index: ${(props) => props.node.priority};
-
-  cursor: move;
 
   transform: translate(
     ${(props) => `${props.node.xPos}px`},

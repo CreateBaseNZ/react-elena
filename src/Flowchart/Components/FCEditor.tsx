@@ -2,13 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { useDrop, XYCoord } from "react-dnd";
 import styled from "styled-components";
 import { DragTypes, renderNode } from "./Nodes/FCNodes";
-import { ElenaNode, ElenaRelation } from "../Data/NodeData";
+import { ElenaNode, ElenaRelation, FCEditorMode } from "../Data/NodeData";
 import { v4 as uuid } from "uuid";
-import { ArcherContainer } from "react-archer";
+import Xarrow from "react-xarrows/lib";
 
 interface FCEditorProps {
   className?: string;
   nodes: ElenaNode[];
+  mode: FCEditorMode;
+  setMode: React.Dispatch<React.SetStateAction<FCEditorMode>>;
+  removeNode: (targetNode: ElenaNode) => void;
   relations?: ElenaRelation[];
 }
 
@@ -16,15 +19,26 @@ interface FCEditorContainerProps {
   className?: string;
   nodes?: ElenaNode[];
   relations?: ElenaRelation[];
+  setCode?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const UnstyledFCEditor = (props: FCEditorProps) => {
   return (
-    <ArcherContainer className={props.className}>
+    <div className={props.className}>
       {props.nodes.map((node) => {
-        return renderNode(node, true);
+        return renderNode(
+          node,
+          props.mode,
+          true,
+          props.setMode,
+          props.removeNode
+        );
       })}
-    </ArcherContainer>
+      {props.relations &&
+        props.relations.map((relation, index) => {
+          return <Xarrow key={index} {...relation} />;
+        })}
+    </div>
   );
 };
 
@@ -37,6 +51,18 @@ const FCEditor = styled(UnstyledFCEditor)<{ isOver: boolean }>`
 
 const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
   const [nodes, setNodes] = useState<ElenaNode[]>([]);
+  const [relations, setRelations] = useState<ElenaRelation[]>([]);
+  const [mode, setMode] = useState<FCEditorMode>("Normal");
+
+  useEffect(() => {
+    if (props.nodes) {
+      setNodes(props.nodes);
+    }
+
+    if (props.relations) {
+      setRelations(props.relations);
+    }
+  }, [props.nodes, props.relations]);
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: DragTypes.NODE,
@@ -44,7 +70,8 @@ const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
       isOver: !!monitor.isOver(),
     }),
     drop: (item: ElenaNode, monitor) => {
-      let editorDimensions = editorRef.current?.getBoundingClientRect() as DOMRect;
+      let editorDimensions =
+        editorRef.current?.getBoundingClientRect() as DOMRect;
       let dropCoordinates = monitor.getSourceClientOffset() as XYCoord;
 
       let xCoordinate = dropCoordinates.x - editorDimensions.x;
@@ -58,6 +85,8 @@ const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
           type: item.type,
           xPos: xCoordinate,
           yPos: yCoordinate,
+          inputs: item.inputs ? item.inputs : undefined,
+          outputs: item.outputs ? item.outputs : undefined,
         };
 
         addNode(newNode);
@@ -67,12 +96,18 @@ const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
     },
   }));
 
-  useEffect(() => {
-    console.log(nodes);
-  }, [nodes]);
-
   const addNode = (newNode: ElenaNode) => {
     setNodes((prevNodes) => [...prevNodes, newNode]);
+  };
+
+  const removeNode = (targetNode: ElenaNode) => {
+    setNodes((prevNodes) => {
+      let index = prevNodes.findIndex((node) => node.id === targetNode.id);
+      if (index === -1) return prevNodes;
+      let newNodes = [...prevNodes];
+      newNodes.splice(index, 1);
+      return newNodes;
+    });
   };
 
   const moveNode = (id: string, newPos: { x: number; y: number }) => {
@@ -102,7 +137,13 @@ const UnstyledFCEditorContainer = (props: FCEditorContainerProps) => {
   return (
     <div className={props.className} ref={drop}>
       <div ref={editorRef} id={"pos-container"}>
-        <FCEditor isOver={isOver} nodes={nodes} />
+        <FCEditor
+          isOver={isOver}
+          nodes={nodes}
+          mode={mode}
+          setMode={setMode}
+          removeNode={removeNode}
+        />
       </div>
     </div>
   );

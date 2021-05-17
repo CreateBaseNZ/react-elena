@@ -11,6 +11,7 @@ interface FlowEditorProps {
   variableList?: {};
   nodes?: ElenaNode[];
   relations?: ElenaRelation[];
+  setCode?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 function UnstyledFlowEditor(props: FlowEditorProps) {

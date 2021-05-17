@@ -12,8 +12,10 @@ export interface ElenaNode {
 }
 
 export interface ElenaRelation {
-  source: string;
-  target: string;
+  start: string;
+  end: string;
 }
+
+export type FCEditorMode = "Normal" | "Relation";
 
 export type NodeType = "Process" | "Terminator" | "Decision" | null;

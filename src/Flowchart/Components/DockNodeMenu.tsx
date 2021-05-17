@@ -1,4 +1,3 @@
-import { ArcherContainer } from "react-archer";
 import styled from "styled-components";
 import { ElenaNode } from "../Data/NodeData";
 import { renderNode } from "./Nodes/FCNodes";
@@ -12,28 +11,11 @@ interface DockNodeMenuProps {
 let UnstyledDockNodeMenu = (props: DockNodeMenuProps) => {
   return (
     <div className={props.className}>
-      <ArcherContainer>
-        <ul>
-          {props.nodeList.map((node, index) => {
-            return (
-              <li key={index}>
-                {renderNode(
-                  {
-                    type: node.type,
-                    name: node.name,
-                    id: node.id,
-                    xPos: node.xPos,
-                    yPos: node.yPos,
-                    priority: node.priority,
-                    isStatic: node.isStatic,
-                  },
-                  false
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </ArcherContainer>
+      <ul>
+        {props.nodeList.map((node, index) => {
+          return <li key={index}>{renderNode(node, "Normal", false)}</li>;
+        })}
+      </ul>
     </div>
   );
 };
